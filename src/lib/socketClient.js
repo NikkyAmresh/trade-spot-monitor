@@ -7,6 +7,25 @@ class SocketClient {
     this._path = path;
     this._createSocket();
     this._handlers = new Map();
+    this._id = 1;
+    this.isConnected = false;
+  }
+
+  subscribeStream(stream) {
+    if (this.isConnected) {
+      this._ws.send(
+        JSON.stringify({
+          method: "SUBSCRIBE",
+          params: [stream + "@trade"],
+          id: this._id,
+        })
+      );
+      this._id++;
+    } else {
+      setTimeout(() => {
+        this.subscribeStream(stream);
+      }, 1000);
+    }
   }
 
   _createSocket() {
@@ -15,6 +34,7 @@ class SocketClient {
 
     this._ws.onopen = () => {
       logger.info("ws connected");
+      this.isConnected = true;
     };
 
     this._ws.on("pong", () => {

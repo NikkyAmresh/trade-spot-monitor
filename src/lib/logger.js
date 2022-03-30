@@ -1,12 +1,15 @@
 const logger = {
   debug: (...arg) => {
-    console.log((new Date()).toISOString(), 'DEBUG', ...arg);
+    console.debug(new Date().toISOString(), "DEBUG", ...arg);
   },
   info: (...arg) => {
-    console.log((new Date()).toISOString(), 'INFO', ...arg);
+    console.info(new Date().toISOString(), "INFO", ...arg);
   },
   warn: (...arg) => {
-    console.log((new Date()).toISOString(), 'WARN', ...arg);
+    console.warn(new Date().toISOString(), "WARN", ...arg);
+  },
+  error: (...arg) => {
+    console.error(new Date().toISOString(), "ERROR", ...arg);
   },
 };
 

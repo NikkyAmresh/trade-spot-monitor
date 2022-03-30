@@ -1,29 +1,48 @@
 #!/usr/bin/env node
 
 import SocketClient from "../lib/socketClient";
-const Binance = require("node-binance-api");
+import { tradePairs, comparisonOperators } from "../config";
 
-// const streamName = "ethbtc";
+const comparison = (operator, x, y) => {
+  switch (operator) {
+    case comparisonOperators.eq:
+      return x === y;
+    case comparisonOperators.gt:
+      return x > y;
+    case comparisonOperators.lt:
+      return x < y;
+    case comparisonOperators.lte:
+      return x <= y;
+    case comparisonOperators.gte:
+      return x >= y;
+    default:
+      return false;
+  }
+};
 
-const k = (streamName) => {
-  const socketClient = new SocketClient(
-    `ws/${streamName}@trade`,
-    "wss://stream.binance.com:9443/"
-  );
+const listenStream = () => {
+  const socketClient = new SocketClient(`ws`, "wss://stream.binance.com:9443/");
+
+  tradePairs.forEach((pair) => {
+    socketClient.subscribeStream(pair.streamName);
+  });
 
   socketClient.setHandler("trade", (params) => {
-    console.log(`[Spot ${streamName}] current:${params.p} `);
+    const tradePair = tradePairs.find(
+      (x) => x.streamName.toLowerCase() === params.s.toLowerCase()
+    );
+    if (comparison(tradePair.comparisonOperator, params.p, tradePair.value)) {
+      console.log(
+        `[Alert ${params.s}@${params.e}] current[${new Date(
+          params.T
+        ).toUTCString()}]:${params.p} | ${params.s} is ${
+          tradePair.comparisonOperator
+        } ${tradePair.value}`
+      );
+    } else {
+      // console.log(`${params.s} => ${params.p}`);
+    }
   });
 };
 
-// const binance = new Binance().options({
-//   APIKEY: "<key>",
-//   APISECRET: "<secret>",
-// });
-// (async () => {
-//   let ticker = await binance.prices();
-//   const sts = Object.keys(ticker);
-//   sts.forEach((stream) => {
-//     k(stream);
-//   });
-// })();
+listenStream();
