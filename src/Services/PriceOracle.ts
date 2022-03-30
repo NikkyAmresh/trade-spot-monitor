@@ -1,8 +1,14 @@
-import WebSocket from "ws";
+import * as WebSocket from "ws";
 import logger from "../lib/logger";
 
 class PriceOracle {
-  constructor(path, baseUrl) {
+  baseUrl: String;
+  _path: String;
+  _handlers: Map<any, any>;
+  _id: number;
+  isConnected: boolean;
+  _ws: any;
+  constructor(path: string, baseUrl: string) {
     this.baseUrl = baseUrl || "wss://stream.binance.com/";
     this._path = path;
     this._createSocket();
@@ -11,7 +17,7 @@ class PriceOracle {
     this.isConnected = false;
   }
 
-  subscribeStream(stream) {
+  subscribeStream(stream: String) {
     if (this.isConnected) {
       this._ws.send(
         JSON.stringify({
@@ -31,7 +37,7 @@ class PriceOracle {
 
   _createSocket() {
     logger.info(`${this.baseUrl}${this._path}`);
-    this._ws = new WebSocket(`${this.baseUrl}${this._path}`);
+    this._ws = new WebSocket.default(`${this.baseUrl}${this._path}`);
 
     this._ws.onopen = () => {
       logger.info("ws connected");
@@ -50,17 +56,17 @@ class PriceOracle {
       logger.warn("ws closed");
     };
 
-    this._ws.onerror = (err) => {
+    this._ws.onerror = (err: any) => {
       logger.warn("ws error", err);
     };
 
-    this._ws.onmessage = (msg) => {
+    this._ws.onmessage = (msg: { data: string; }) => {
       try {
         const message = JSON.parse(msg.data);
         if (this.isMultiStream(message)) {
-          this._handlers.get(message.stream).forEach((cb) => cb(message));
+          this._handlers.get(message.stream).forEach((cb: (arg0: any) => any) => cb(message));
         } else if (message.e && this._handlers.has(message.e)) {
-          this._handlers.get(message.e).forEach((cb) => {
+          this._handlers.get(message.e).forEach((cb: (arg0: any) => void) => {
             cb(message);
           });
         } else {
@@ -74,7 +80,7 @@ class PriceOracle {
     this.heartBeat();
   }
 
-  isMultiStream(message) {
+  isMultiStream(message: { stream: any; }) {
     return message.stream && this._handlers.has(message.stream);
   }
 
@@ -87,7 +93,7 @@ class PriceOracle {
     }, 5000);
   }
 
-  setHandler(method, callback) {
+  setHandler(method: string, callback: (params: any) => void) {
     if (!this._handlers.has(method)) {
       this._handlers.set(method, []);
     }

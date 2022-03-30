@@ -1,17 +1,17 @@
-import bunyan from "bunyan";
+import * as bunyan from "bunyan";
 const log = bunyan.createLogger({ name: "myapp" });
 
 const logger = {
-  debug: (...arg) => {
+  debug: (...arg: any) => {
     log.debug(new Date().toISOString(), "DEBUG", ...arg);
   },
-  info: (...arg) => {
+  info: (...arg: any) => {
     log.info(new Date().toISOString(), "INFO", ...arg);
   },
-  warn: (...arg) => {
+  warn: (...arg: any) => {
     log.warn(new Date().toISOString(), "WARN", ...arg);
   },
-  error: (...arg) => {
+  error: (...arg: any) => {
     log.error(new Date().toISOString(), "ERROR", ...arg);
   },
 };

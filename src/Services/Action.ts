@@ -1,14 +1,19 @@
 import logger from "../lib/logger";
+
 class Action {
-  static comparisonOperators = {
+  static comparisonOperators: comparisonOperator = {
     gt: ">",
     eq: "===",
     lt: "<",
     lte: "<=",
     gte: ">=",
   };
+  operator: String;
+  triggerValue: Number;
+  currentValue: Number;
+  params: any;
 
-  constructor(operator, triggerValue, currentValue, params) {
+  constructor(operator: String, triggerValue: any, currentValue: any, params: any) {
     this.operator = operator;
     this.triggerValue = triggerValue;
     this.currentValue = currentValue;
@@ -38,8 +43,7 @@ class Action {
       logger.info(
         `[Alert ${this.params.s}@${this.params.e}] current[${new Date(
           this.params.T
-        ).toUTCString()}]:${this.params.p} | ${this.params.s} is ${
-          this.operator
+        ).toUTCString()}]:${this.params.p} | ${this.params.s} is ${this.operator
         } ${this.triggerValue}`
       );
     }

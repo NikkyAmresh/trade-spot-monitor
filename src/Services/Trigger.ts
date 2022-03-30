@@ -4,7 +4,9 @@ import PriceOracle from "./PriceOracle";
 import Action from "./Action";
 
 class Trigger {
-  constructor(tradePairs = []) {
+  tradePairs: tradePair[];
+
+  constructor(tradePairs: tradePair[]) {
     this.tradePairs = tradePairs;
   }
   listenStream() {
@@ -17,8 +19,8 @@ class Trigger {
       socketClient.subscribeStream(pair.streamName);
     });
 
-    const previousPrices = {};
-    socketClient.setHandler("trade", (params) => {
+    const previousPrices: { [key: string]: Number } = {};
+    socketClient.setHandler("trade", (params: { s: string; p: any; }) => {
       const tradePair = this.tradePairs.find(
         (x) => x.streamName.toLowerCase() === params.s.toLowerCase()
       );
@@ -27,14 +29,17 @@ class Trigger {
         !previousPrices[params.s] ||
         (previousPrices[params.s] && previousPrices[params.s] !== params.p)
       ) {
-        const action = new Action(
-          tradePair.comparisonOperator,
-          tradePair.value,
-          params.p,
-          params
-        );
-        action.listen();
-        previousPrices[params.s] = params.p;
+        if (tradePair) {
+          const action = new Action(
+            tradePair.comparisonOperator,
+            tradePair.value,
+            params.p,
+            params
+          );
+
+          action.listen();
+          previousPrices[params.s] = params.p;
+        }
       }
     });
   }
