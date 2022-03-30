@@ -18,7 +18,7 @@
     "nodemon": "^2.0.7"
   },
   "scripts": {
-    "monitor-spot-trade": "nodemon -w ./src --exec babel-node ./src/spot/monitor-trade.js"
+    "listen": "nodemon -w ./src --exec babel-node src/index.js"
   },
   "license": "MIT"
 }

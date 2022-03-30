@@ -15,14 +15,9 @@
 //   'TRXETH',   'POWRBTC',  'POWRETH',  'ARKBTC',  'ARKETH',  'YOYOETH',
 //   'XRPBTC',   'XRPETH',   'MODBTC',   'MODETH',  'ENJBTC',  'ENJETH',
 //   'STORJBTC', 'STORJETH', 'BNBUSDT',  'VENBNB',
+import Action from "./Services/Action";
 
-const comparisonOperators = {
-  gt: ">",
-  eq: "===",
-  lt: "<",
-  lte: "<=",
-  gte: ">=",
-};
+const comparisonOperators = Action.comparisonOperators;
 
 const tradePairs = [
   {

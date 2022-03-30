@@ -1,13 +1,13 @@
 import WebSocket from "ws";
-import logger from "./logger";
+import logger from "../lib/logger";
 
-class SocketClient {
+class PriceOracle {
   constructor(path, baseUrl) {
     this.baseUrl = baseUrl || "wss://stream.binance.com/";
     this._path = path;
     this._createSocket();
     this._handlers = new Map();
-    this._id = 1;
+    this._id = 0;
     this.isConnected = false;
   }
 
@@ -16,12 +16,12 @@ class SocketClient {
       this._ws.send(
         JSON.stringify({
           method: "SUBSCRIBE",
-          params: [stream + "@trade"],
+          params: [`${stream}@trade`],
           id: this._id,
         })
       );
       logger.info("Listening to stream " + stream);
-      this._id++;
+      ++this._id;
     } else {
       setTimeout(() => {
         this.subscribeStream(stream);
@@ -95,4 +95,4 @@ class SocketClient {
   }
 }
 
-export default SocketClient;
+export default PriceOracle;
