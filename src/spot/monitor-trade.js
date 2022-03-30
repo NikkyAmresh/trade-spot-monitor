@@ -27,20 +27,28 @@ const listenStream = () => {
     socketClient.subscribeStream(pair.streamName);
   });
 
+  const previousPrices = {};
   socketClient.setHandler("trade", (params) => {
     const tradePair = tradePairs.find(
       (x) => x.streamName.toLowerCase() === params.s.toLowerCase()
     );
-    if (comparison(tradePair.comparisonOperator, params.p, tradePair.value)) {
-      logger.info(
-        `[Alert ${params.s}@${params.e}] current[${new Date(
-          params.T
-        ).toUTCString()}]:${params.p} | ${params.s} is ${
-          tradePair.comparisonOperator
-        } ${tradePair.value}`
-      );
-    } else {
-      // console.log(`${params.s} => ${params.p}`);
+
+    if (
+      !previousPrices[params.s] ||
+      (previousPrices[params.s] && previousPrices[params.s] !== params.p)
+    ) {
+      if (comparison(tradePair.comparisonOperator, params.p, tradePair.value)) {
+        logger.info(
+          `[Alert ${params.s}@${params.e}] current[${new Date(
+            params.T
+          ).toUTCString()}]:${params.p} | ${params.s} is ${
+            tradePair.comparisonOperator
+          } ${tradePair.value}`
+        );
+      } else {
+        // console.log(`${params.s} => ${params.p}`);
+      }
+      previousPrices[params.s] = params.p;
     }
   });
 };
