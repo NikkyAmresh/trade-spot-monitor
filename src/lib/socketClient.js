@@ -20,6 +20,7 @@ class SocketClient {
           id: this._id,
         })
       );
+      logger.info("Listening to stream " + stream);
       this._id++;
     } else {
       setTimeout(() => {
@@ -29,7 +30,7 @@ class SocketClient {
   }
 
   _createSocket() {
-    console.log(`${this.baseUrl}${this._path}`);
+    logger.info(`${this.baseUrl}${this._path}`);
     this._ws = new WebSocket(`${this.baseUrl}${this._path}`);
 
     this._ws.onopen = () => {
@@ -38,10 +39,10 @@ class SocketClient {
     };
 
     this._ws.on("pong", () => {
-      // logger.debug("receieved pong from server");
+      logger.debug("receieved pong from server");
     });
     this._ws.on("ping", () => {
-      // logger.debug("==========receieved ping from server");
+      logger.debug("==========receieved ping from server");
       this._ws.pong();
     });
 
@@ -63,7 +64,7 @@ class SocketClient {
             cb(message);
           });
         } else {
-          logger.warn("Unknown method", message);
+          logger.info(message);
         }
       } catch (e) {
         logger.warn("Parse message failed", e);
@@ -81,7 +82,7 @@ class SocketClient {
     setInterval(() => {
       if (this._ws.readyState === WebSocket.OPEN) {
         this._ws.ping();
-        // logger.debug("ping server");
+        logger.debug("ping server");
       }
     }, 5000);
   }

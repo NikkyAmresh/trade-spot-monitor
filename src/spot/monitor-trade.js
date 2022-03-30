@@ -2,7 +2,7 @@
 
 import SocketClient from "../lib/socketClient";
 import { tradePairs, comparisonOperators } from "../config";
-
+import logger from "../lib/logger";
 const comparison = (operator, x, y) => {
   switch (operator) {
     case comparisonOperators.eq:
@@ -32,7 +32,7 @@ const listenStream = () => {
       (x) => x.streamName.toLowerCase() === params.s.toLowerCase()
     );
     if (comparison(tradePair.comparisonOperator, params.p, tradePair.value)) {
-      console.log(
+      logger.info(
         `[Alert ${params.s}@${params.e}] current[${new Date(
           params.T
         ).toUTCString()}]:${params.p} | ${params.s} is ${
