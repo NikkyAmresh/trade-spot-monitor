@@ -3,16 +3,15 @@
 import PriceOracle from "./PriceOracle";
 import Action from "./Action";
 
+export enum comparisonOperators {
+  gt = ">",
+  eq = "===",
+  lt = "<",
+  lte = "<=",
+  gte = ">=",
+};
 class Trigger {
   tradePairs: tradePair[];
-
-  static comparisonOperators: comparisonOperator = {
-    gt: ">",
-    eq: "===",
-    lt: "<",
-    lte: "<=",
-    gte: ">=",
-  };
   action: Action;
   priceOracle: PriceOracle;
 
@@ -22,8 +21,8 @@ class Trigger {
     this.action = action;
   }
 
-  compare(operator: String, currentValue: number, triggerValue: number) {
-    const operators = Trigger.comparisonOperators;
+  compare(operator: String, currentValue: Number, triggerValue: Number) {
+    const operators = comparisonOperators;
     switch (operator) {
       case operators.eq:
         return currentValue === triggerValue;
@@ -47,8 +46,8 @@ class Trigger {
       socketClient.subscribeStream(pair.streamName);
     });
 
-    const previousPrices: { [key: string]: Number } = {};
-    socketClient.setHandler("trade", (params: { price: number; entityName: string; }) => {
+    const previousPrices: PreviousPrices = {};
+    socketClient.setHandler("trade", (params: messagePayload) => {
       const tradePair = this.tradePairs.find(
         (x) => x.streamName.toLowerCase() === params.entityName.toLowerCase()
       );

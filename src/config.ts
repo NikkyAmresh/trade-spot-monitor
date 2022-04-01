@@ -1,6 +1,4 @@
-import Trigger from "./Services/Trigger";
-
-const comparisonOperators = Trigger.comparisonOperators;
+import { comparisonOperators } from "./Services/Trigger";
 
 const config: { tradePairs: tradePair[] } = {
   tradePairs: [

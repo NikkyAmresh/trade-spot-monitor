@@ -6,7 +6,7 @@ class Action {
     this.callback = callback;
   }
 
-  excuteAction(data: any) {
+  excuteAction(data: messagePayload) {
     this.callback(data);
   }
 }
