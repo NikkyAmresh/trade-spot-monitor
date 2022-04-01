@@ -6,39 +6,62 @@ import Action from "./Action";
 class Trigger {
   tradePairs: tradePair[];
 
-  constructor(tradePairs: tradePair[]) {
+  static comparisonOperators: comparisonOperator = {
+    gt: ">",
+    eq: "===",
+    lt: "<",
+    lte: "<=",
+    gte: ">=",
+  };
+  action: Action;
+  priceOracle: PriceOracle;
+
+  constructor(tradePairs: tradePair[], priceOracle: PriceOracle, action: Action) {
     this.tradePairs = tradePairs;
+    this.priceOracle = priceOracle
+    this.action = action;
   }
+
+  compare(operator: String, currentValue: number, triggerValue: number) {
+    const operators = Trigger.comparisonOperators;
+    switch (operator) {
+      case operators.eq:
+        return currentValue === triggerValue;
+      case operators.gt:
+        return currentValue > triggerValue;
+      case operators.lt:
+        return currentValue < triggerValue;
+      case operators.lte:
+        return currentValue <= triggerValue;
+      case operators.gte:
+        return currentValue >= triggerValue;
+      default:
+        return false;
+    }
+  }
+
   listenStream() {
-    const socketClient = new PriceOracle(
-      `ws`,
-      "wss://stream.binance.com:9443/"
-    );
+    const socketClient = this.priceOracle;
 
     this.tradePairs.forEach((pair) => {
       socketClient.subscribeStream(pair.streamName);
     });
 
     const previousPrices: { [key: string]: Number } = {};
-    socketClient.setHandler("trade", (params: { s: string; p: any; }) => {
+    socketClient.setHandler("trade", (params: { price: number; entityName: string; }) => {
       const tradePair = this.tradePairs.find(
-        (x) => x.streamName.toLowerCase() === params.s.toLowerCase()
+        (x) => x.streamName.toLowerCase() === params.entityName.toLowerCase()
       );
 
       if (
-        !previousPrices[params.s] ||
-        (previousPrices[params.s] && previousPrices[params.s] !== params.p)
+        !previousPrices[params.entityName] ||
+        (previousPrices[params.entityName] && previousPrices[params.entityName] !== params.price)
       ) {
         if (tradePair) {
-          const action = new Action(
-            tradePair.comparisonOperator,
-            tradePair.value,
-            params.p,
-            params
-          );
-
-          action.listen();
-          previousPrices[params.s] = params.p;
+          if (this.compare(tradePair.comparisonOperator, params.price, tradePair.value)) {
+            this.action.excuteAction(params);
+          }
+          previousPrices[params.entityName] = params.price;
         }
       }
     });

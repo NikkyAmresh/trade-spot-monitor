@@ -1,6 +1,6 @@
-import Action from "./Services/Action";
+import Trigger from "./Services/Trigger";
 
-const comparisonOperators = Action.comparisonOperators;
+const comparisonOperators = Trigger.comparisonOperators;
 
 const config: { tradePairs: tradePair[] } = {
   tradePairs: [

@@ -8,7 +8,9 @@ class PriceOracle {
   _id: number;
   isConnected: boolean;
   _ws: any;
-  constructor(path: string, baseUrl: string) {
+  dataFormat: any;
+  constructor(path: string, dataFormat: any, baseUrl: string,) {
+    this.dataFormat = dataFormat;
     this.baseUrl = baseUrl || "wss://stream.binance.com/";
     this._path = path;
     this._createSocket();
@@ -33,6 +35,14 @@ class PriceOracle {
         this.subscribeStream(stream);
       }, 1000);
     }
+  }
+
+  getPathValue(payload: { [x: string]: any; }, path: string) {
+    const jsonpath = path.split(".");
+    for (let i = 0; i < jsonpath.length; i++) {
+      payload = payload[jsonpath[i]];
+    }
+    return payload;
   }
 
   _createSocket() {
@@ -64,10 +74,19 @@ class PriceOracle {
       try {
         const message = JSON.parse(msg.data);
         if (this.isMultiStream(message)) {
-          this._handlers.get(message.stream).forEach((cb: (arg0: any) => any) => cb(message));
+          this._handlers.get(message.stream).forEach((cb: (arg0: any) => any) => cb(
+            {
+              price: this.getPathValue(message, this.dataFormat.price),
+              timestamp: this.getPathValue(message, this.dataFormat.timestamp),
+              entityName: this.getPathValue(message, this.dataFormat.entityName)
+            }));
         } else if (message.e && this._handlers.has(message.e)) {
           this._handlers.get(message.e).forEach((cb: (arg0: any) => void) => {
-            cb(message);
+            cb({
+              price: this.getPathValue(message, this.dataFormat.price),
+              timestamp: this.getPathValue(message, this.dataFormat.timestamp),
+              entityName: this.getPathValue(message, this.dataFormat.entityName)
+            });
           });
         } else {
           logger.info(message);
